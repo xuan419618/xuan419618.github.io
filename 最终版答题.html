@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深夜便利店孤品解构 | 你的专属情绪小票</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #090d16;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 40%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .app-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+        /* 玻璃拟态卡片 */
+        .neon-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .neon-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+        }
+        /* 实体小票样式 */
+        .receipt-ticket {
+            background: #fdfbf7;
+            color: #1e293b;
+            border-radius: 20px;
+            padding: 28px 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        .hidden { display: none !important; }
+        
+        .badge-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #d97706;
+            background: rgba(251, 191, 36, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .btn-neon {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            color: #0f172a;
+            font-weight: 900;
+            font-size: 15px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.35);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+        }
+        .btn-neon:active { transform: scale(0.96); opacity: 0.9; }
+        
+        .option-item {
+            width: 100%;
+            text-align: left;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            color: #e2e8f0;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            line-height: 1.5;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-item:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(251, 191, 36, 0.4);
+            transform: translateY(-2px);
+        }
+        .option-item:active { transform: scale(0.98); }
+        
+        .opt-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fbbf24;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 900;
+            margin-right: 14px;
+            flex-shrink: 0;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        
+        .progress-shell {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .progress-inner {
+            background: linear-gradient(90deg, #fbbf24, #f97316);
+            height: 100%;
+            width: 5%;
+            transition: width 0.4s ease;
+            border-radius: 3px;
+        }
+        
+        .report-section {
+            background: #f1f5f9;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 12.5px;
+            color: #334155;
+            line-height: 1.6;
+            border-left: 4px solid #cbd5e1;
+        }
+        .report-section.amber {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <!-- 封面页 -->
+        <div id="cover-page" class="neon-card" style="text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 16px; filter: drop-shadow(0 0 15px rgba(251,191,36,0.5));">🏪</div>
+            <span class="badge-tag">NIGHT CONVENIENCE STORE LAB</span>
+            <h1 style="font-size: 24px; font-weight: 900; margin-bottom: 12px; letter-spacing: 0.5px;">深夜便利店孤品解构</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 24px; line-height: 1.7;">
+                当城市熄灯，你是货架上哪一件等待被理解的“隐秘孤品”？20道微观场景心理投射，生成你的专属高价值人格档案。
+            </p>
+            
+            <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; text-align: left; font-size: 12px; color: #cbd5e1; margin-bottom: 24px; line-height: 1.8;">
+                <div>⚡ <b>20道深度心理投射题</b>（沉浸式情境）</div>
+                <div>📊 <b>多维剖析</b>：压力应激机制 / 社交边界</div>
+                <div>💌 <b>专属情绪小票</b>（可截图保存兑换周边）</div>
+            </div>
+
+            <button id="start-btn" class="btn-neon">推门进入深夜便利店</button>
+        </div>
+
+        <!-- 答题页 -->
+        <div id="quiz-page" class="neon-card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <span id="question-progress" style="font-size: 11px; color: #fbbf24; background: rgba(251,191,36,0.15); padding: 4px 12px; border-radius: 20px; font-weight: 700;">Q1 / 20</span>
+                <span style="font-size: 11px; color: #64748b; letter-spacing: 2px; font-family: monospace;">AM 01:23</span>
+            </div>
+            
+            <div class="progress-shell">
+                <div id="progress-bar" class="progress-inner"></div>
+            </div>
+            
+            <h2 id="question-title" style="font-size: 16px; font-weight: 700; margin-bottom: 24px; line-height: 1.6; color: #f8fafc;">加载中...</h2>
+            <div id="options-container"></div>
+        </div>
+
+        <!-- 结果报告页（实体小票风格） -->
+        <div id="result-page" class="receipt-ticket hidden">
+            <div style="text-align: center; padding-bottom: 14px; border-bottom: 2px dashed #cbd5e1; margin-bottom: 18px;">
+                <span style="font-size: 9px; letter-spacing: 2px; color: #94a3b8; font-weight: bold;">EMOTIONAL RECEIPT & PROFILE</span>
+                <h3 style="font-size: 12px; font-weight: 900; color: #0f172a; margin-top: 4px;">—— 深夜便利店孤品解构深度档案 ——</h3>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 22px;">
+                <span id="result-tag" style="font-size: 11px; background: #fef3c7; color: #b45309; padding: 4px 14px; border-radius: 20px; font-weight: 800; border: 1px solid #fde68a;">人格标签</span>
+                <h2 id="result-name" style="font-size: 21px; font-weight: 900; margin-top: 10px; margin-bottom: 6px; color: #0f172a;">孤品名称</h2>
+                <p id="result-desc" style="font-size: 12.5px; color: #475569; line-height: 1.6; padding: 0 4px;">描述...</p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div class="report-section">
+                    <strong style="display: block; color: #0f172a; margin-bottom: 4px; font-size: 13px;">🔍 核心心理机制解构</strong>
+                    <p id="res-analysis">-</p>
+                </div>
+                <div class="report-section">
+                    <strong style="display: block; color: #0f172a; margin-bottom: 4px; font-size: 13px;">⚡ 压力应激与内耗根源</strong>
+                    <p id="res-stress">-</p>
+                </div>
+                <div class="report-section amber">
+                    <strong style="display: block; color: #92400e; margin-bottom: 4px; font-size: 13px;">💡 专属能量处方（治愈指南）</strong>
+                    <p id="res-tip" style="font-weight: 600;">-</p>
+                </div>
+            </div>
+
+            <div style="background: #0f172a; color: #f8fafc; border-radius: 16px; padding: 16px; font-size: 12px; margin-bottom: 20px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: #94a3b8;">灵魂配方：</span><span id="res-flavor" style="color: #fcd34d; font-weight: 600; text-align: right;">-</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">安全保质期：</span><span id="res-shelf" style="font-weight: 600; text-align: right; color: #e2e8f0;">-</span></div>
+            </div>
+
+            <button id="restart-btn" class="btn-neon" style="margin-bottom: 14px; font-size: 14px; padding: 14px;">重新测试 / 探索其他孤品形态</button>
+            <p style="font-size: 10px; text-align: center; color: #64748b; letter-spacing: 0.5px;">✨ 请截图保存此专业报告小票，凭此向店员解锁专属实体文创周边。</p>
+        </div>
+    </div>
+
+    <script>
+        // 复用前面的20题题库与结果数据
+        const questions = [
+            { title: "1. 深夜推开便利店的门，首先钻入鼻腔和耳朵的是什么？", options: [{ text: "烤肠机上滋滋冒油的香气，以及微波炉的一声叮", type: "warm" }, { text: "店员熟练且标准的一声‘欢迎光临’", type: "order" }, { text: "冰柜低沉的轰鸣声，和空无一人的过道", type: "cold" }, { text: "货架上层出不穷的限定新口味海报", type: "soda" }] },
+            { title: "2. 站在货架前，面对‘原价稳妥款’和‘贴了红标签的快过期盲盒便当’，你会：", options: [{ text: "毫不犹豫拿走打折盲盒，觉得充满未知的刺激", type: "soda" }, { text: "仔细看保质期和配料表，最后选最安全的那一款", type: "order" }, { text: "纠结很久，最后选了一袋最基础的白吐司", type: "sandwich" }, { text: "看心情，如果今天很累就奖励自己最贵的一款", type: "warm" }] },
+            { title: "3. 结账时发现屏幕显示金额比预想的贵了2块钱（可能是涨价或标错），你会：", options: [{ text: "直接付钱，懒得计较，两块钱买个省心", type: "milk" }, { text: "礼貌地问一句：‘诶？这个是不是标错价了？’", type: "mint" }, { text: "嘴上不说，但心里开始默默盘算超预算的原因", type: "daifuku" }, { text: "算了，顺便把旁边想买又没舍得的口香糖一起拿了", type: "soda" }] },
+            { title: "4. 店员多送了一张‘深夜刮刮乐’，你刮开它时的第一直觉是：", options: [{ text: "‘肯定中不了，谢谢惠顾吧。’", type: "cold" }, { text: "‘万一中了个大奖呢！’", type: "soda" }, { text: "刮完就算，毫无波澜，随手扔进垃圾桶", type: "milk" }, { text: "仔细研究中奖规则，觉得背后一定有概率算法", type: "mint" }] },
+            { title: "5. 深夜拎着袋子走在回家的路上，忽然迎面跑来一只流浪猫。你会：", options: [{ text: "蹲下来试探着摸摸它，甚至想分出火腿肠喂它", type: "radish" }, { text: "保持安全距离冲它笑笑，然后目送它走远", type: "daifuku" }, { text: "有点害怕被抓伤，加快脚步迅速走过去", type: "cold" }, { text: "觉得它比人类可爱多了，甚至想给它拍张照", type: "bread" }] },
+            { title: "6. 回到家关上房门的一瞬间，你最想做的事是：", options: [{ text: "彻底瘫倒在沙发上，连衣服都不想换", type: "radish" }, { text: "洗个热水澡，点上香薰，进行严谨的自我整理", type: "order" }, { text: "打开手机疯狂刷视频，用热闹填补空白", type: "soda" }, { text: "关掉所有灯，在黑夜里静静发呆消化情绪", type: "warm" }] },
+            { title: "7. 在挑选饮料时，面对花里胡哨的新品和从小喝到大的经典款，你的选择是：", options: [{ text: "永远选没喝过的新品，踩雷也开心", type: "soda" }, { text: "选最经典的那个，闭着眼睛都不会出错", type: "milk" }, { text: "看包装颜值决定，长得好看就买", type: "bread" }, { text: "选无糖或者低卡的，健康最重要", type: "mint" }] },
+            { title: "8. 挑好东西去收银台，前面排了长长的一支队伍，只有一个收银员在慢吞吞结账。你会：", options: [{ text: "开始低头刷手机，毫无波澜地等待", type: "milk" }, { text: "有点烦躁，在心里默默计算效率为什么这么低", type: "mint" }, { text: "干脆把东西放回货架，不买了", type: "daifuku" }, { text: "观察前面的人都在买什么，觉得挺有意思", type: "radish" }] },
+            { title: "9. 关东煮的汤底咕嘟咕嘟冒着热气，如果要选一样串串，你的第一直觉是：", options: [{ text: "吸满了汤汁、软糯入味的白萝卜", type: "radish" }, { text: "扎实顶饱、富有嚼劲的牛肉丸", type: "warm" }, { text: "热量较低、口感爽脆的魔芋丝", type: "mint" }, { text: "吸饱油脂、香气扑鼻的吸汁面筋", type: "bread" }] },
+            { title: "10. 离开便利店时，自动门发出‘叮咚’的提示音，你习惯的步速是：", options: [{ text: "步履轻快，边走边拆开包装品尝", type: "soda" }, { text: "不紧不慢，享受深夜独处的微风", type: "cold" }, { text: "行色匆匆，只想快点回到安全的家里", type: "order" }, { text: "思绪飘忽，一边走路一边想今天发生的事", type: "radish" }] },
+            { title: "11. 走到半路，天空突然开始飘起细密的雨丝，而你没带伞。此时你的第一反应是：", options: [{ text: "叹口气，跑回旁边的便利店顺便买把透明伞", type: "order" }, { text: "索性不跑了，享受一下雨中散步的浪漫", type: "soda" }, { text: "加快脚步冲进最近的屋檐下，开始懊恼没看天气预报", type: "sandwich" }, { text: "内心毫无波澜，任由雨水打湿外套", type: "cold" }] },
+            { title: "12. 终于回到房间，你脱下外套，发现手机里有一条未读的工作/学习消息，来自不太熟的人。你会：", options: [{ text: "立刻秒回，生怕给对方留下不好的印象", type: "sandwich" }, { text: "看见了但不想回，决定明天早起再说", type: "daifuku" }, { text: "认真措辞，反复修改后才小心翼翼回复", type: "order" }, { text: "直接调成免打扰，今晚谁也不想理", type: "cold" }] },
+            { title: "13. 洗漱完毕躺上床，脑海里开始不受控制地复盘今天白天发生的某件尴尬小事。你会：", options: [{ text: "在心里疯狂抠脚，恨不得穿越回去改掉它", type: "radish" }, { text: "叹口气，告诉自己‘反正别人也记不住’然后强迫睡觉", type: "milk" }, { text: "越想越气，开始在脑海里演练如果重来一次该怎么反击", type: "mint" }, { text: "翻个身，顺势开始幻想一个绝美的开放式剧情", type: "soda" }] },
+            { title: "14. 关于未来的生活状态，如果让你选一个形容词，你的直觉是：", options: [{ text: "安稳、有秩序、不出意料", type: "milk" }, { text: "充满未知、自由自在、拒绝被定义", type: "soda" }, { text: "虽然辛苦，但始终在默默坚持和成长", type: "sandwich" }, { text: "保持距离，拥有属于自己的绝对精神领地", type: "cold" }] },
+            { title: "15. 当你感到极度疲惫、精疲力竭时，你最希望身边的朋友怎么对你？", options: [{ text: "什么都别问，默默陪在我身边或者给我点个外卖", type: "warm" }, { text: "离我远点，让我一个人独处充会儿电", type: "cold" }, { text: "听我疯狂吐槽发泄，帮我把情绪垃圾倒出去", type: "radish" }, { text: "带我去吃好吃的或者看个电影，转移一下注意力", type: "bread" }] },
+            { title: "16. 在处理复杂的人际关系时，你通常扮演的角色是：", options: [{ text: "润滑剂和倾听者，总是照顾所有人的情绪", type: "radish" }, { text: "理性的局外人，用客观视角看穿一切", type: "mint" }, { text: "踏实靠谱的执行者，安排好所有繁琐的细节", type: "sandwich" }, { text: "表面合群但内心随时准备抽离的‘隐形人’", type: "daifuku" }] },
+            { title: "17. 如果生活是一座迷宫，你觉得自己手里的武器是什么？", options: [{ text: "一面坚固耐用的盾牌（极强的自我保护与秩序）", type: "order" }, { text: "一把能看穿迷雾的放大镜（理性的洞察与逻辑）", type: "mint" }, { text: "一盏随时能照亮前路的提灯（温暖与共情）", type: "warm" }, { text: "一双可以随时飞跃障碍的翅膀（自由与创造力）", type: "soda" }] },
+            { title: "18. 你觉得自己在别人眼中是一个什么样的人？", options: [{ text: "温和、好说话、甚至有点太体贴了", type: "radish" }, { text: "有点高冷、独立、不好轻易接近", type: "cold" }, { text: "靠谱、沉稳、让人很有安全感", type: "milk" }, { text: "有趣、脑洞大、永远不知道下一步要干嘛", type: "soda" }] },
+            { title: "19. 在深夜的纯黑画布上，如果允许你随意添加一个元素，你选：", options: [{ text: "一束穿透黑暗的温暖光束", type: "warm" }, { text: "一颗闪烁但孤独的遥远恒星", type: "cold" }, { text: "一朵正在盛开的、生命力顽强的花", type: "bread" }, { text: "一道绚丽但不羁的霓虹极光", type: "soda" }] },
+            { title: "20. 最后，闭上眼睛深吸一口气，此刻你内心最真实的渴望是：", options: [{ text: "被无条件地理解和深深地拥抱一次", type: "radish" }, { text: "拥有绝对不被打扰的绝对清净", type: "cold" }, { text: "明天能够一切顺利，掌控所有的生活节奏", type: "order" }, { text: "去一个完全没有人认识我的地方重新开始", type: "soda" }] }
+        ];
+
+        const resultsData = {
+            warm: { name: "【暖柜深处的罐装热咖啡】", tag: "外冷内热·深度守护型人格", desc: "你拥有极强的心理防御机制，外表看似冷静、慢热甚至带有一层冰冷的金属外壳，但实际上你的内心储藏着极其炽热的温度。", analysis: "心理学投射表明，选择此项的个体通常在人际交往中建立有较高的心理边界，害怕轻易信任后带来的失望。你的安全感来自于对环境的掌控。", stress: "当压力过大时，你倾向于采取‘情绪隔离’策略，将痛苦和疲惫全部压在心底，独自默默消化。", tip: "练习允许自己示弱。不需要永远当那个刀枪不入的支撑者。", flavor: "微苦后劲深长的榛果拿铁风味", shelf: "极长（需要长期的深度信任）" },
+            radish: { name: "【深夜1:30的关东煮萝卜】", tag: "高敏共情·无界治愈型人格", desc: "你就像浸泡在高汤里的萝卜，极其柔软、通透，具有极高的情感共鸣能力，仿佛自带天然的治愈场。", analysis: "你属于‘情绪海绵体’。你对外界的微小氛围变化有着超乎常人的敏锐度，常常把不属于自己的负面情绪一并吸收进来。", stress: "压力爆发时表现为瞬间的‘心力交瘁’与‘彻底瘫痪’，觉得连维持基本的社交礼貌都变成了一种奢望。", tip: "必须建立严格的‘情绪防火墙’。分清哪些是你的课题，哪些是别人的课题。", flavor: "昆布高汤的温润与丰沛咸香", shelf: "今夜限定（情绪极易被消耗）" },
+            daifuku: { name: "【打折区冷萃日式大福】", tag: "反差防卫·独立灵动型人格", desc: "你拥有极高的社交情商和伪装天赋，外表软糯、好说话，但只要有人试图过度侵入私人领地，就会撞上冰凉坚硬的防卫心。", analysis: "你对‘被捆绑’或‘过度亲密’有着天然的警惕。你追求精神上的绝对自由与空间，讨厌被定义。", stress: "当人际关系变得粘稠、复杂或充满控制欲时，你的第一反应是悄无声息地疏离，开启‘断联模式’。", tip: "大福放一放是会变软的。偶尔向真正懂你的人展露真实的内在。", flavor: "冰淇淋夹心的清甜与微凉薄脆", shelf: "取决于今天的心情防线" },
+            soda: { name: "【限量版微醺气泡苏打】", tag: "创造力爆棚·热烈自由型人格", desc: "你就像一瓶在深夜不断冒泡的限量版汽水。你对世界充满好奇，拥有天马行空的审美与创造力。", analysis: "你具有极强的‘自我表达驱动力’。你的情绪如波浪般起伏，快乐时能点燃全场，低落时也会坠入极端的虚无。", stress: "当生活陷入日复一日的枯燥循环时，你会产生强烈的‘窒息感’与逃离冲动。", tip: "为自己设计一个‘情绪密封盖’。允许自己有不冒泡、不发光的时刻。", flavor: "白桃乌龙与跳跳糖的微醺碰撞", shelf: "开瓶即饮（热情来得快去得也快）" },
+            sandwich: { name: "【货架底层的孤独三明治】", tag: "默默耕耘·实用主义型人格", desc: "你是生活里最踏实的实干家。在简朴、实用主义的外表下，藏着一颗极其渴望被精心对待的灵魂。", analysis: "你拥有很强的‘秩序感与责任感’。你习惯扮演那个不出错、让人放心但又常常拿不到聚光灯的角色。", stress: "当付出长期得不到对等的回应或认可时，你会陷入委屈与疲惫的无力感中。", tip: "停止默默等待别人的奖赏。学会主动把自己的成果展示出来。", flavor: "全麦吐司与香浓蛋黄酱的扎实风味", shelf: "建议今日内食用，需要及时补给" },
+            milk: { name: "【纯粹经典的无糖纯牛奶】", tag: "定海神针·稳定内核型人格", desc: "看似平平无奇，却是一所有人生活里最离不开的底层支撑。你拥有极其罕见的稳定情绪内核。", analysis: "心理成熟度极高。你擅长用客观、理性的底层逻辑去化解生活中的焦虑，给周围人带来极大的安全感。", stress: "由于表现得‘太稳了’，以至于所有人都忘记了其实你也会难过。", tip: "生活不需要永远克制和完美。偶尔在牛奶里加一点甜甜的焦糖。", flavor: "醇厚微甜的原生奶香，纯粹安心", shelf: "超长保质期，极其稳固可靠" },
+            mint: { name: "【冷柜角落的进口薄荷糖】", tag: "人间清醒·独立疏离型人格", desc: "你随时随地保持着让人惊叹的高度清醒，擅长用冷幽默和绝对的理性解构生活的荒诞。", analysis: "你的思维模式偏向‘解构主义’。你很难被主流价值观洗脑，对虚伪的社交寒暄有着本能的排斥。", stress: "面对不够聪明的规则或低效的人际交往时，会表现出明显的精神疲劳。", tip: "偶尔允许自己的大脑‘当机卡壳’一次，难得糊涂也是一种甜。", flavor: "强烈直冲天灵盖的冰爽强力薄荷", shelf: "永久保存，常年处于绝对清醒状态" },
+            bread: { name: "【深夜出炉的焦糖菠萝包】", tag: "治愈甜心·温暖外壳型人格", desc: "你表面上带着一层香甜酥脆、充满防御力的脆壳，但只要轻轻剥开，内心其实软得一塌糊涂。", analysis: "你的心理防御非常具有欺骗性——用开朗、好接近的外壳来包裹自己细腻敏感的内在。", stress: "当遇到重创时，脆壳会碎掉，露出里面湿漉漉、容易受伤的内心。", tip: "不要把所有的刺和坚强都留给别人，把最柔软的拥抱留给自己。", flavor: "浓郁黄油与焦糖交织的治愈甜香", shelf: "赏味期金贵，需要被细心呵护" }
+        };
+
+        let currentQuestion = 0;
+        let userScores = [];
+
+        document.getElementById('start-btn').addEventListener('click', function() {
+            document.getElementById('cover-page').classList.add('hidden');
+            document.getElementById('quiz-page').classList.remove('hidden');
+            loadQuestion();
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', function() {
+            currentQuestion = 0;
+            userScores = [];
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('cover-page').classList.remove('hidden');
+        });
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResult();
+                return;
+            }
+            const q = questions[currentQuestion];
+            const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progressPercent + '%';
+            document.getElementById('question-progress').innerText = `Q${currentQuestion + 1} / 20`;
+            document.getElementById('question-title').innerText = q.title;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-item";
+                btn.innerHTML = `<span class="opt-letter">${String.fromCharCode(65 + idx)}</span> <span>${opt.text}</span>`;
+                btn.addEventListener('click', function() {
+                    userScores.push(opt.type);
+                    currentQuestion++;
+                    loadQuestion();
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        function showResult() {
+            document.getElementById('quiz-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+
+            const counts = {};
+            userScores.forEach(t => counts[t] = (counts[t] || 0) + 1);
+            let bestType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, 'warm');
+            
+            const res = resultsData[bestType] || resultsData['warm'];
+            
+            document.getElementById('result-tag').innerText = res.tag;
+            document.getElementById('result-name').innerText = res.name;
+            document.getElementById('result-desc').innerText = res.desc;
+            document.getElementById('res-analysis').innerText = res.analysis;
+            document.getElementById('res-stress').innerText = res.stress;
+            document.getElementById('res-tip').innerText = res.tip;
+            document.getElementById('res-flavor').innerText = res.flavor;
+            document.getElementById('res-shelf').innerText = res.shelf;
+        }
+    </script>
+</body>
+</html>
