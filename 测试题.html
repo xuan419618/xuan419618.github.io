@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深夜便利店孤品解构 | 你的灵魂味觉标签</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.70);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .receipt-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-md mx-auto">
+        <!-- 封面页 -->
+        <div id="cover-page" class="glass-card rounded-3xl p-8 text-center receipt-shadow transition-all duration-500">
+            <div class="inline-block p-3 bg-amber-400/10 rounded-2xl text-amber-400 mb-4 text-2xl">🏪</div>
+            <span class="text-xs tracking-widest text-amber-400 uppercase font-semibold bg-amber-400/10 px-3 py-1 rounded-full">深夜解压企划</span>
+            <h1 class="text-2xl font-bold mt-4 mb-2 tracking-wide">深夜便利店孤品解构</h1>
+            <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+                当城市熄灯，你是深夜货架上哪一件等待被理解的“隐秘美味”？
+            </p>
+            <button onclick="startQuiz()" class="w-full py-4 bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 font-bold rounded-2xl shadow-lg shadow-amber-400/20 hover:opacity-95 active:scale-95 transition-all">
+                推门进入便利店
+            </button>
+            <p class="text-xs text-slate-500 mt-6">✨ 选出直觉答案，生成你的专属情绪小票</p>
+        </div>
+
+        <!-- 答题页 -->
+        <div id="quiz-page" class="hidden glass-card rounded-3xl p-6 md:p-8 receipt-shadow">
+            <div class="flex justify-between items-center mb-6">
+                <span id="question-progress" class="text-xs font-medium text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full">Q1 / 6</span>
+                <span class="text-xs text-slate-500">深夜 01:23</span>
+            </div>
+            <h2 id="question-title" class="text-lg font-bold mb-6 text-slate-100 leading-relaxed">加载中...</h2>
+            <div id="options-container" class="space-y-3">
+                <!-- 选项由 JS 动态渲染 -->
+            </div>
+        </div>
+
+        <!-- 结果页（小票样式） -->
+        <div id="result-page" class="hidden bg-slate-100 text-slate-900 rounded-3xl p-6 md:p-8 receipt-shadow relative overflow-hidden">
+            <!-- 锯齿边缘视觉装饰 -->
+            <div class="absolute top-0 left-0 right-0 h-2 bg-slate-300 opacity-50"></div>
+            
+            <div class="text-center pb-4 border-b border-dashed border-slate-300">
+                <p class="text-xs tracking-widest text-slate-500 uppercase">-- 情绪消费凭证 --</p>
+                <h3 class="text-xs font-bold text-slate-800 mt-1">NIGHT CONVENIENCE STORE RECEIPT</h3>
+            </div>
+
+            <div class="py-6 text-center">
+                <span id="result-tag" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">孤品人设</span>
+                <h2 id="result-name" class="text-2xl font-black mt-3 mb-2 text-slate-900">加载中...</h2>
+                <p id="result-desc" class="text-sm text-slate-600 leading-relaxed px-2">加载中...</p>
+            </div>
+
+            <div class="bg-slate-200/60 rounded-2xl p-4 text-xs space-y-2 text-slate-700 mb-6">
+                <div class="flex justify-between"><span>保质期：</span><span id="res-shelf" class="font-medium text-slate-900">-</span></div>
+                <div class="flex justify-between"><span>核心风味：</span><span id="res-flavor" class="font-medium text-slate-900">-</span></div>
+                <div class="flex justify-between"><span>治愈锦囊：</span><span id="res-tip" class="font-medium text-slate-900 text-right">-</span></div>
+            </div>
+
+            <button onclick="restartQuiz()" class="w-full py-3.5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 active:scale-95 transition-all text-sm">
+                重新测试 / 换个心情
+            </button>
+            <p class="text-[10px] text-center text-slate-400 mt-4">截图保存小票，向店员（或发朋友圈）解锁你的情绪实体周边</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                title: "深夜推开便利店的门，首先钻入鼻腔和耳朵的是什么？",
+                options: [
+                    { text: "烤肠机上滋滋冒油的香气，以及微波炉的一声叮", type: "warm" },
+                    { text: "店员熟练且标准的一声‘欢迎光临’", type: "order" },
+                    { text: "冰柜低沉的轰鸣声，和空无一人的过道", type: "cold" },
+                    { text: "货架上层出不穷的限定新口味海报", type: "soda" }
+                ]
+            },
+            {
+                title: "面对‘原价稳妥款’和‘贴了红标签的快过期盲盒便当’，你会：",
+                options: [
+                    { text: "毫不犹豫拿走打折盲盒，觉得充满未知的刺激", type: "soda" },
+                    { text: "仔细看保质期和配料表，最后选最安全的那一款", type: "order" },
+                    { text: "纠结很久，最后选了一袋最基础的白吐司", type: "sandwich" },
+                    { text: "看心情，如果今天很累就奖励自己最贵的一款", type: "warm" }
+                ]
+            },
+            {
+                title: "结账时发现屏幕显示金额比预想的贵了2块钱，你会：",
+                options: [
+                    { text: "直接付钱，懒得计较，两块钱买个省心", type: "milk" },
+                    { text: "礼貌地问一句：‘诶？这个是不是标错价了？’", type: "mint" },
+                    { text: "嘴上不说，但心里开始默默盘算超预算的原因", type: "daifuku" },
+                    { text: "算了，顺便把旁边想买又没舍得的口香糖一起拿了", type: "soda" }
+                ]
+            },
+            {
+                title: "店员多送了一张‘深夜刮刮乐’，你刮开它时的第一直觉是：",
+                options: [
+                    { text: "‘肯定中不了，谢谢惠顾吧。’", type: "cold" },
+                    { text: "‘万一中了个大奖呢！’", type: "soda" },
+                    { text: "刮完就算，毫无波澜，随手扔进垃圾桶", type: "milk" },
+                    { text: "仔细研究中奖规则，觉得背后一定有概率算法", type: "mint" }
+                ]
+            },
+            {
+                title: "深夜拎着袋子走在回家的路上，忽然迎面跑来一只流浪猫。你会：",
+                options: [
+                    { text: "蹲下来试探着摸摸它，甚至想分出火腿肠喂它", type: "radish" },
+                    { text: "保持安全距离冲它笑笑，然后目送它走远", type: "daifuku" },
+                    { text: "有点害怕被抓伤，加快脚步迅速走过去", type: "cold" },
+                    { text: "觉得它比人类可爱多了，甚至想给它拍张照", type: "bread" }
+                ]
+            },
+            {
+                title: "回到家关上房门的一瞬间，你最想做的事是：",
+                options: [
+                    { text: "彻底瘫倒在沙发上，连衣服都不想换", type: "radish" },
+                    { text: "洗个热水澡，点上香薰，进行严谨的自我整理", type: "order" },
+                    { text: "打开手机疯狂刷视频，用热闹填补空白", type: "soda" },
+                    { text: "关掉所有灯，在黑夜里静静发呆消化情绪", type: "warm" }
+                ]
+            }
+        ];
+
+        const resultsData = {
+            warm: {
+                name: "【暖柜深处的罐装热咖啡】",
+                tag: "外冷内热型",
+                desc: "外表冰冷坚硬，有着极强的防备心与秩序感，但内心其实维持着刚好55℃的执念，一旦被拿出来就会温暖别人。",
+                shelf: "极长（需建立信任）",
+                flavor: "微苦中带有回甘的拿铁风味",
+                tip: "偶尔撕掉‘坚强’的标签，展现脆弱并不丢人。"
+            },
+            radish: {
+                name: "【深夜1:30的关东煮萝卜】",
+                tag: "高敏共情型",
+                desc: "吸饱了生活的汤汁，变得无比通透，极具包容力。总是照顾别人的情绪，但也极其容易因为吸收太多负能量而感到疲惫。",
+                shelf: "今夜限定（易被消耗）",
+                flavor: "昆布高汤的温润与咸香",
+                tip: "学会把自己从汤里捞出来，今晚请先好好爱自己。"
+            },
+            daifuku: {
+                name: "【打折区冷萃日式大福】",
+                tag: "反差防卫型",
+                desc: "外表软糯人畜无害，内里却藏着一层冰凉坚硬的防卫心。追求绝对的自由与边界感，讨厌被过度黏腻的人际关系捆绑。",
+                shelf: "取决于今天的心情",
+                flavor: "冰淇淋夹心的清甜与微凉",
+                tip: "大福放一放会变软，试着向信任的人敞开一丝缝隙。"
+            },
+            soda: {
+                name: "【限量版微醺气泡苏打】",
+                tag: "创意灵动型",
+                desc: "摇晃时满是气泡与热烈，安静时又极度清澈。追求极致的审美与新鲜感，讨厌平庸与重复，拥有天马行空的创造力。",
+                shelf: "开瓶即饮（热情来得快）",
+                flavor: "白桃乌龙与跳跳糖的碰撞",
+                tip: "允许自己有不冒泡的时候，安静的你同样迷人。"
+            },
+            sandwich: {
+                name: "【货架底层的孤独三明治】",
+                tag: "默默付出型",
+                desc: "实用主义的外表下，藏着一颗渴望被精心对待的灵魂。你总是踏实做好分内的事，习惯了扮演靠谱的角色，却偶尔渴望被偏爱。",
+                shelf: "建议今日内食用",
+                flavor: "全麦吐司与香浓蛋黄酱",
+                tip: "不用总是当懂事的成年人，你也很值得被温柔以待。"
+            },
+            milk: {
+                name: "【纯粹经典的无糖纯牛奶】",
+                tag: "定海神针型",
+                desc: "看似平平无奇，却是所有人生活里最离不开的底层支撑。你有着极其稳定的情绪内核，是朋友和团队里最让人安心的存在。",
+                shelf: "超长保质期",
+                flavor: "醇厚微甜的原生奶香",
+                tip: "偶尔也可以加点喜欢的糖浆，生活不需要永远完美克制。"
+            },
+            mint: {
+                name: "【冷柜角落的进口薄荷糖】",
+                tag: "人间清醒型",
+                desc: "随时保持高度清醒，擅长用冷幽默和绝对的理性看透生活的本质。外表看似疏离，实则拥有极高的洞察力和独特的温柔。",
+                shelf: "永久保存",
+                flavor: "强烈直冲天灵盖的冰爽薄荷",
+                tip: "偶尔允许自己脑子卡壳一次，不用永远那么清醒。"
+            },
+            bread: {
+                name: "【深夜出炉的焦糖菠萝包】",
+                tag: "治愈甜心型",
+                desc: "表面带着香甜酥脆的脆壳，内心其实软得一塌糊涂。你有着天然的治愈场，能轻易融化周围人的冰冷，是个温暖的小太阳。",
+                shelf: "赏味期金贵",
+                flavor: "浓郁黄油与焦糖的甜香",
+                tip: "不要把所有的刺都用来保护别人，先保护好自己滚烫的心。"
+            }
+        };
+
+        let currentQuestion = 0;
+        let userScores = [];
+
+        function startQuiz() {
+            document.getElementById('cover-page').classList.add('hidden');
+            document.getElementById('quiz-page').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResult();
+                return;
+            }
+            const q = questions[currentQuestion];
+            document.getElementById('question-progress').innerText = `Q${currentQuestion + 1} / 6`;
+            document.getElementById('question-title').innerText = q.title;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/50 transition-all text-sm text-slate-200 active:scale-[0.98]";
+                btn.innerHTML = `<span class="inline-block w-6 h-6 rounded-full bg-slate-700 text-amber-400 text-center text-xs leading-6 mr-2 font-bold">${String.fromCharCode(65 + idx)}</span> ${opt.text}`;
+                btn.onclick = () => selectOption(opt.type);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(type) {
+            userScores.push(type);
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+
+            // 统计得分最高的结果类型，如果没有匹配到默认给 warm
+            const counts = {};
+            userScores.forEach(t => counts[t] = (counts[t] || 0) + 1);
+            let bestType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, 'warm');
+            
+            const res = resultsData[bestType] || resultsData['warm'];
+            
+            document.getElementById('result-tag').innerText = res.tag;
+            document.getElementById('result-name').innerText = res.name;
+            document.getElementById('result-desc').innerText = res.desc;
+            document.getElementById('res-shelf').innerText = res.shelf;
+            document.getElementById('res-flavor').innerText = res.flavor;
+            document.getElementById('res-tip').innerText = res.tip;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            userScores = [];
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('cover-page').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
